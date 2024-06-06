@@ -50,7 +50,7 @@ export default function App() {
           <div> <Space> 
             <Link to={"/"} >
             <img
-              src="/src/assets/small_Coventry_University.png"
+              src="/src/assets/the_canine_shelter.png"
               alt="profile-img"
               className="profile-img-card"
             />
@@ -94,7 +94,7 @@ export default function App() {
       </Content>
       <Footer>
         <Copyright /><img
-              src="/src/assets/SHAPE_logo.png"
+              src="/src/assets/dog_logo.png"
               alt="profile-img"
               className="profile-img-card"
               style={{float:'right'}}

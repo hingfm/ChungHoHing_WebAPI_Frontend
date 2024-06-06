@@ -45,7 +45,7 @@ export default function App() {
           <div> <Space> 
             <Link to={"/"} >
             <img
-              src="/src/assets/SHAPE_logo.png"
+              src="/src/assets/dog_logo.png"
               alt="profile-img"
               className="profile-img-card"
             />
