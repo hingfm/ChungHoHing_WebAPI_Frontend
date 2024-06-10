@@ -1,13 +1,14 @@
 //import React from 'react';
-import Article from './Articles';
+import Article from "./Articles";
 const Home = () => {
-  return (<>
-  <p></p>
-  <h2 style={{color:"#135200",marginLeft:"25px"}}><strong>Pet shelter</strong></h2>
-        <Article />
-  </>)
-}
+  return (
+    <div className="flex flex-col justify-center">
+      <div className="py-4 px-10 text-green-900 font-bold">
+        <p>Pet shelter</p>
+      </div>
+      <Article />
+    </div>
+  );
+};
 
-
-         
 export default Home;
