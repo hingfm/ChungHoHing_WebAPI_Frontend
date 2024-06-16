@@ -5,4 +5,5 @@ export default interface UserT {
   password: string,
   role: string,
   actiCode:string
+  region: string
 }

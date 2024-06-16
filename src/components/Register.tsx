@@ -2,9 +2,11 @@ import "antd/dist/reset.css";
 import React, { useState } from "react";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 import UserT from "../types/user.type";
-import { Form, Input, Button } from "antd";
+import { Form, Input, Button, Select } from "antd";
 import { register } from "../services/auth.service";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
+import axios from "axios";
+import { api } from "./common/http-common";
 
 const Register: React.FC = () => {
   let navigate: NavigateFunction = useNavigate();
@@ -14,12 +16,18 @@ const Register: React.FC = () => {
     password: "",
     role: "user",
     actiCode: "",
+    region: ""
   };
-
+  const [regions, setRegions] = useState([]);
+  React.useEffect(() => {
+    axios.get(`${api.uri}/regions`).then((resp) => {
+      setRegions(resp.data)
+    });
+  }, []);
   const handleRegister = (values: UserT) => {
-    const { username, email, password, actiCode } = values;
+    const { username, email, password, actiCode, region } = values;
 
-    register(username, email, password, actiCode)
+    register(username, email, password, actiCode, region)
       .then((response) => {
         window.alert(
           `Welcome ${username} pls login to access your account profile`
@@ -115,6 +123,20 @@ const Register: React.FC = () => {
           ]}
         >
           <Input.Password placeholder="Confirm Password" />
+        </Form.Item>
+        <Form.Item required name="region" label="Region" rules={[
+          {
+            required: true,
+            message: "Please select your region"
+          },
+        ]}>
+          <Select options={
+            regions.map((r: any) => {
+              return {
+                value: r.region
+              }
+            })
+          } />
         </Form.Item>
         <Form.Item name="actiCode" label="Activation Code">
           <Input.Password

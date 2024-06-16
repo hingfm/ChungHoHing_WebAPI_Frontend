@@ -2,13 +2,14 @@ import axios from "axios";
 import { api } from '../components/common/http-common';
 import { Buffer } from 'buffer';
 
-export const register = async (username: string, email: string, password: string, actiCode:string) => {
+export const register = async (username: string, email: string, password: string, actiCode:string, region:string) => {
   return await axios
     .post(api.uri + "/users", {
     username,
     email,
     password,
     actiCode,  
+    region
   })
 };
 
