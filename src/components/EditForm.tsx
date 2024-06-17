@@ -1,179 +1,105 @@
-import "antd/dist/reset.css";
-import React, { useState } from "react";
-import { NavigateFunction, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Form, Input, Button, Modal, Typography, Select } from "antd";
-import { EditOutlined, EditFilled } from "@ant-design/icons";
+import { EditOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { api } from "./common/http-common";
 import { getCurrentUser } from "../services/auth.service";
+
 const { Title } = Typography;
 const { TextArea } = Input;
 
-const EditForm: React.FC = (props: any) => {
-  let navigate: NavigateFunction = useNavigate();
-  const [loading, setLoading] = useState<boolean>(false);
-  const [message, setMessage] = useState<string>("");
-  const [isShow, setIsShow] = React.useState(false);
-  const [regions, setRegions] = useState([]);
-  const [kinds, setKinds] = useState([]);
-  React.useEffect(() => {
+interface EditFormProps {
+  isNew: boolean;
+  aid?: string; // Article ID is optional if it's a new article creation
+}
+
+const EditForm: React.FC<EditFormProps> = ({ isNew, aid }) => {
+  const navigate = useNavigate();
+  const [articleData, setArticleData] = useState({
+    title: "",
+    alltext: "",
+    summary: "",
+    description: "",
+    imageurl: "",
+  });
+  const [regions, setRegions] = useState<Array<any>>([]);
+  const [kinds, setKinds] = useState<Array<any>>([]);
+  const [isShow, setIsShow] = useState(false);
+
+  useEffect(() => {
     axios.get(`${api.uri}/regions`).then((resp) => {
       setRegions(resp.data);
     });
     axios.get(`${api.uri}/kinds`).then((resp) => {
       setKinds(resp.data);
     });
-  }, []);
-  const aa: any = JSON.parse(localStorage.getItem("e") || "{}");
-  // console.log("aa  ", aa)
-  //console.log('aa.title ',aa.title)
-  const contentRules = [{ required: true, message: "Please input somethings" }];
+
+    if (!isNew && aid) {
+      axios.get(`${api.uri}/articles/${aid}`).then((res) => {
+        setArticleData(res.data);
+      });
+    }
+  }, [isNew, aid]);
 
   const handleFormSubmit = (values: any) => {
-    const t = values.title;
-    const a = values.alltext;
-    const s = values.summary;
-    const d = values.description;
-    const u = values.imageurl;
-    const currentUser = getCurrentUser();
+    const postArticle = { ...values, authorid: getCurrentUser().id };
+    const url = `${api.uri}/articles${isNew ? '' : '/' + aid}`;
+    const method = isNew ? axios.post : axios.put;
 
-    // console.log('new article '+ t,a,s,d,u,currentUser.id);
-    const postArticle = {
-      title: t,
-      alltext: a,
-      summary: s,
-      description: d,
-      imageurl: u,
-      authorid: currentUser.id,
-      region: values.region,
-      kinds: values.kinds
-    };
-
-    if (props.isNew == false) {
-      console.log(`path: ${api.uri}/articles${props.aid}`);
-      axios
-        .put(`${api.uri}/articles/${props.aid}`, postArticle, {
-          headers: {
-            Authorization: `Basic ${localStorage.getItem("aToken")}`,
-          },
-        })
-        .then((res) => {
-          alert("Article updated");
-          console.log(res.data);
-          localStorage.removeItem("e");
-          navigate("/");
-          window.location.reload();
-        });
-    } else {
-      console.log(`path: ${api.uri}/articles`);
-      axios
-        .post(`${api.uri}/articles`, postArticle, {
-          headers: {
-            Authorization: `Basic ${localStorage.getItem("aToken")}`,
-          },
-        })
-        .then((res) => {
-          alert("New Article created");
-          console.log(res.data);
-          navigate("/");
-          window.location.reload();
-        });
-    }
+    method(url, postArticle, {
+      headers: { Authorization: `Basic ${localStorage.getItem("aToken")}` },
+    }).then((res) => {
+      alert(`Article ${isNew ? 'created' : 'updated'}`);
+      navigate("/");
+      window.location.reload();
+    }).catch((err) => {
+      console.error("Error submitting the article:", err);
+      alert("Failed to process the article");
+    });
   };
+
   return (
     <>
-      <Button
-        icon={<EditOutlined />}
-        onClick={() => {
-          setIsShow(true);
-        }}
-      />
+      <Button icon={<EditOutlined />} onClick={() => setIsShow(true)} />
       <Modal
         open={isShow}
-        onCancel={() => {
-          setIsShow(false);
-        }}
-        title="Welcome Blogger"
+        onCancel={() => setIsShow(false)}
+        title={isNew ? "Create New Article" : "Update Article"}
         footer={[]}
       >
-        <p></p>
-        {props.isNew ? (
-          <Title level={3} style={{ color: "#0032b3" }}>
-            Create New Article
-          </Title>
-        ) : (
-          <Title level={3} style={{ color: "#0032b3" }}>
-            Update Article
-          </Title>
-        )}
-        <Form name="article" onFinish={(values) => handleFormSubmit(values)}>
-          <Form.Item name="title" label="Title" rules={contentRules}>
-            {props.isNew ? (
-              <Input />
-            ) : (
-              <Input defaultValue={!props.isNew && aa.title} />
-            )}
+        <Form
+          name="article"
+          onFinish={handleFormSubmit}
+          initialValues={articleData}
+        >
+          <Form.Item name="title" label="Title" rules={[{ required: true, message: "Please input the title" }]}>
+            <Input />
           </Form.Item>
-          <Form.Item name="alltext" label="About me" rules={contentRules}>
-            {props.isNew ? (
-              <TextArea rows={2} />
-            ) : (
-              <TextArea rows={2} defaultValue={!props.isNew && aa.alltext} />
-            )}
+          <Form.Item name="alltext" label="About me" rules={[{ required: true, message: "Please input the article content" }]}>
+            <TextArea rows={2} />
           </Form.Item>
           <Form.Item name="summary" label="Summary">
-            {props.isNew ? (
-              <TextArea rows={2} />
-            ) : (
-              <TextArea rows={2} defaultValue={!props.isNew && aa.summary} />
-            )}
+            <TextArea rows={2} />
           </Form.Item>
           <Form.Item name="description" label="Detail Description">
-            {props.isNew ? (
-              <TextArea rows={2} />
-            ) : (
-              <TextArea
-                rows={2}
-                defaultValue={!props.isNew && aa.description}
-              />
-            )}
+            <TextArea rows={2} />
           </Form.Item>
           <Form.Item name="imageurl" label="ImageURL">
-            {props.isNew ? (
-              <Input />
-            ) : (
-              <Input defaultValue={!props.isNew && aa.imageurl} />
-            )}
+            <Input />
           </Form.Item>
           <Form.Item
-            required
             name="region"
             label="Region"
-            rules={[
-              {
-                required: true,
-                message: "Please select your region",
-              },
-            ]}
+            rules={[{ required: true, message: "Please select your region" }]}
           >
             <Select
-              options={regions.map((r: any) => {
-                return {
-                  value: r.region,
-                };
-              })}
+              options={regions.map((r) => ({ label: r.region, value: r.region }))}
             />
           </Form.Item>
-          <Form.Item
-            name="kinds"
-            label="Kinds"
-          >
+          <Form.Item name="kinds" label="Kinds">
             <Select
-              options={kinds.map((k: any) => {
-                return {
-                  value: k.kind,
-                };
-              })}
+              options={kinds.map((k) => ({ label: k.kind, value: k.kind }))}
             />
           </Form.Item>
           <Form.Item>
