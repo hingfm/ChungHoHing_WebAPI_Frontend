@@ -41,8 +41,11 @@ export const login = async (username: string, password: string) => {
    
           
     
-} 
+}  
 
+export const loginWithGoogle = async (googleData: any) => {
+  return axios.post(api.uri + "/auth/google", googleData);
+};
 
 export const logout = () => {
   localStorage.removeItem("user");
