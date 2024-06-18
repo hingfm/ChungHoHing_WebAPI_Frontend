@@ -45,7 +45,7 @@ const Dashboard = () => {
       </div>
       <div className="flex gap-2">
         <div className="w-1/2">
-          <p className="px-20 pt-10 text-2xl font-bold">Kinds Stat</p>
+          <p className="px-20 pt-10 text-2xl font-bold">Breeds Stat</p>
         {bar}
         </div>
         <div className="w-1/2">
