@@ -61,7 +61,7 @@ const EditForm: React.FC<EditFormProps> = ({ isNew, aid }) => {
 
   return (
     <>
-      <Button icon={<EditOutlined />} onClick={() => setIsShow(true)} />
+      <Button icon={<EditOutlined />} onClick={() => setIsShow(true)} >Edit</Button>
       <Modal
         open={isShow}
         onCancel={() => setIsShow(false)}
